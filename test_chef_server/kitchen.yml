@@ -1,0 +1,37 @@
+---
+driver:
+  name: vagrant
+  synced_folders:
+    - ['../../chefapi_client', '/root/go/src/github.com/MarkGibbons/chefapi_client']
+    - ['../../chefapi_client_nodes', '/root/go/src/github.com/MarkGibbons/chefapi_client_nodes']
+    - ['../../chefapi_client_organizations', '/root/go/src/github.com/MarkGibbons/chefapi_client_organizations']
+    - ['../../chefapi_node_auth', '/root/go/src/github.com/MarkGibbons/chefapi_node_auth']
+    - ['../../chefapi_lib', '/root/go/src/github.com/MarkGibbons/chefapi_lib']
+    - ['../test_setup', '/root/go/src/testapi']
+
+provisioner:
+  name: chef_zero
+
+verifier:
+  name: inspec
+
+platforms:
+  - name: ubuntu-18.04
+    driver:
+      network:
+        - ["forwarded_port", { guest: 9001, host: 9001, auto_correct: true }] # auth
+        - ["forwarded_port", { guest: 8111, host: 8111, auto_correct: true }] # nodes
+        - ["forwarded_port", { guest: 8112, host: 8112, auto_correct: true }] # organizations
+        - ["forwarded_port", { guest: 8443, host: 8113, auto_correct: true }] # nginx
+
+suites:
+  - name: default
+    run_list:
+      - recipe[test_chef_server::setup]
+      - recipe[test_chef_server::default]
+      - recipe[test_chef_server::chefapi]
+      - recipe[test_chef_server::chef_objects]
+      - recipe[test_chef_server::services]
+    attributes:
+      chef-server:
+        accept_license: true
