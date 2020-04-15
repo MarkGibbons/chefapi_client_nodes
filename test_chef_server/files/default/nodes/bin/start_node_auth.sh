@@ -18,9 +18,7 @@ DESC="Chefapi node auth rest service"
 
 # chef client settings
 . /usr/local/nodes/bin/settings.sh
-search="restport ${CHEFAPIAUTHPORT}"
-echo -E "ps -ef|grep main|grep ""${search}""|grep -v grep|awk '{print $2}'"
-running=`ps -ef|grep main|grep ""${search}""|grep -v grep|awk '{print $2}'`
+running=$(ps -ef|grep main|grep "restport ${CHEFAPIAUTHPORT}"|grep -v grep|awk '{print $2}')
 
 case "${1}" in
 	start)

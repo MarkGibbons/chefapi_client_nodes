@@ -114,3 +114,6 @@ https://docs.chef.io/api_chef_server/
 https://medium.com/@adigunhammedolalekan/build-and-deploy-a-secure-rest-api-with-go-postgresql-jwt-and-gorm-6fadf3da505b
 https://blog.usejournal.com/authentication-in-golang-c0677bcce1a8 users and authentication scheme
 https://github.com/dgrijalva/jwt-go  json web token
+https://tutorialedge.net/golang/authenticating-golang-rest-api-with-jwts/ jwt basics
+https://www.sohamkamani.com/golang/2019-01-01-jwt-authentication/  jwt login, cookie, renewal
+https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS - cross origin resource sharing

@@ -1,7 +1,7 @@
 # Add chef objects to the server for testing
 
 execute 'get the ssl certificate for the chef server' do
-  command 'knife ssl fetch'
+  command 'knife ssl fetch -s https://localhost -u pivotal -k /etc/opscode/pivotal.pem'
 end
 
 execute 'Get go modules' do
