@@ -16,8 +16,6 @@ end
 
 apt_update 'update'
 
-# package 'nginx'
-
 execute 'apt upgrade' do
   command 'DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" dist-upgrade'
   ignore_failure true

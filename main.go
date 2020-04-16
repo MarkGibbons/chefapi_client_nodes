@@ -38,15 +38,14 @@ var flags restInfo
 
 func main() {
 	flagInit()
-	fmt.Printf("NODE FLAGS %+v\n", flags) //DEBUG
 
 	r := mux.NewRouter()
-	r.HandleFunc("/organizations", getNodes)
-	r.HandleFunc("/organizations/{org}/nodes/{node}", singleNode)
+	r.HandleFunc("/orgnodes", getNodes)
+	r.HandleFunc("/orgnodes/{org}/nodes/{node}", singleNode)
 	r.HandleFunc("/", defaultResp)
 	// TODO: Verify that the request is authorized to call us
 	// TODO: Use TLS
-	log.Fatal(http.ListenAndServe("127.0.0.1:" + flags.Port, r))
+	log.Fatal(http.ListenAndServe(":" + flags.Port, r))
 	return
 }
 
@@ -198,14 +197,10 @@ func listNodes(client *chef.Client, filters NodeFilters) (nodeNames []string, er
 }
 
 func allOrgs() (orgNames []string, err error) {
-	fmt.Println("in Allorgs")
         client := chefapi_client.Client()
-	fmt.Println("passed client create")
         orgList, err  := client.Organizations.List()
-	fmt.Println("passed orglist")
 	orgNames = make([]string, 0, len(orgList))
 	for k := range orgList {
-		fmt.Printf("ADD TO ORGNAMES  K %+v", k)
 		orgNames =  append(orgNames, k)
 	}
         return

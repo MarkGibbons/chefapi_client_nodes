@@ -51,5 +51,3 @@ service 'chefapi-nodes' do
   supports status: true
   action [:start]
 end
-
-# start nginx

@@ -6,11 +6,11 @@ Running this code provides a simpler API than the native chef REST API for use b
 # Front End Endpoints used by web applications
 -----------
 
-## GET /organizations/ORG/nodes
+## GET /orgnodes
 ===========================
 
 ### Request
-Filter values restrict the returned information to a specific owner of the 
+Filter values may restrict the returned information to a specific owner of the 
 nodes and to a specific organization.  If not set nodes for all users and/or all
 organizations will be returned.
 
@@ -37,8 +37,9 @@ The body returned looks like this:
 Values
 200 - List returned
 400 - Invalid request was made
+403 - Unauthorized request was made
 
-## GET /organizations/ORG/nodes/NODE
+## GET /orgnodes/ORG/nodes/NODE
 ===========================
 
 ### Request
@@ -65,8 +66,9 @@ The body returned looks like this:
 Values
 200 - Node data returned
 400 - Invalid request was made
+403 - Unauthorized request was made
 
-## PUT /organizations/ORG/nodes/NODE
+## PUT /orgnodes/ORG/nodes/NODE
 ===========================
 
 ### Request
@@ -96,13 +98,14 @@ The body returned looks like this:
 Values
 200 - Node data returned
 400 - Invalid request was made
+403 - Unauthorized request was made
 
 # Back End Chef Infra Server Endpoints used
 -----------
 
-## GET /organizations/ORG/nodes
-## GET /organizations/ORG/nodes/NODE
-## PUT /organizations/ORG/nodes/NODE
+## GET /orgnodes/ORG/nodes
+## GET /orgnodes/ORG/nodes/NODE
+## PUT /orgnodes/ORG/nodes/NODE
 
 # Links
 -------
