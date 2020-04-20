@@ -5,7 +5,6 @@
 * /etc/hosts make testhost 127.0.0.1?
 * Remove the debug code
 * HANDLE inline TODOs almost all error conditions
-* JWT
 * TLS
 * Further unit tests
 
