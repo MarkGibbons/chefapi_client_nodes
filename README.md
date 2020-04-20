@@ -120,3 +120,6 @@ https://github.com/dgrijalva/jwt-go  json web token
 https://tutorialedge.net/golang/authenticating-golang-rest-api-with-jwts/ jwt basics
 https://www.sohamkamani.com/golang/2019-01-01-jwt-authentication/  jwt login, cookie, renewal
 https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS - cross origin resource sharing
+https://github.com/rs/cors - set up cors response in golang server
+https://www.alexedwards.net/blog/how-to-properly-parse-a-json-request-body - clean up go http handlers
+https://stormpath.com/blog/where-to-store-your-jwts-cookies-vs-html5-web-storage - where to store JWTgit 

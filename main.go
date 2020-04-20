@@ -7,7 +7,10 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/http/httputil"
 	"regexp"
+	"strings"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/mux"
 	"github.com/go-chef/chef"
 	"github.com/MarkGibbons/chefapi_client"
@@ -24,7 +27,7 @@ type restInfo struct {
 type NodeFilters struct {
 	User string `json:"user,omitempty"`
 	Organization string `json:"organization,omitempty"`
-	NodeName string `json:"node_name,omitempty"`
+	NodeName string `json:"node,omitempty"`
 }
 
 type OrgNodes []NodeList
@@ -34,7 +37,14 @@ type NodeList struct {
 	Nodes        []string `json:"nodes"`
 }
 
+type Claims struct {
+        Username string `json:"username"`
+        jwt.StandardClaims
+}
+
 var flags restInfo
+
+var jwtKey = []byte("my_secret_key") // TODO: Parameter for production
 
 func main() {
 	flagInit()
@@ -43,13 +53,13 @@ func main() {
 	r.HandleFunc("/orgnodes", getNodes)
 	r.HandleFunc("/orgnodes/{org}/nodes/{node}", singleNode)
 	r.HandleFunc("/", defaultResp)
-	// TODO: Verify that the request is authorized to call us
 	// TODO: Use TLS
 	log.Fatal(http.ListenAndServe(":" + flags.Port, r))
 	return
 }
 
 func getNodes( w http.ResponseWriter, r *http.Request) {
+	fmt.Printf("GET NODES Method %+v\n", r.Method)
 	w.Header().Set("Content-Type", "application/json")
 	vars := mux.Vars(r)
 	err := cleanInput(vars)
@@ -59,28 +69,36 @@ func getNodes( w http.ResponseWriter, r *http.Request) {
 	}
 	// Get the filter information
 	var filters NodeFilters
-	err = json.NewDecoder(r.Body).Decode(&filters)
-	// TODO: Allow for no filters
-	// if err != nil {
-	        // http.Error(w, err.Error(), http.StatusBadRequest)
-		// return
-	// }
+	// Get the filters from parameters
+	userparm, ok := r.URL.Query()["user"]
+	if ok { filters.User = userparm[0] }
+	orgparm, ok := r.URL.Query()["organization"]
+	if ok { filters.Organization = orgparm[0] }
+	nodeparm, ok := r.URL.Query()["node"]
+	if ok { filters.NodeName = nodeparm[0] }
+
+	// Verify a logged in user made the request
+	_, code := loggedIn(r)
+	if code != -1 {
+		fmt.Printf("Can't verify the user status: %+v\n", code)
+		w.WriteHeader(code)
+		return
+	}
 
 	// Get a list of organizations to search for this request
+	fmt.Printf("Filters : %+v", filters)
 	var orgList []string
 	if filters.Organization == "" {
 		orgList, err = allOrgs()
-		fmt.Println("ORGLIST %+v ERR %+v\n", orgList, err)
 		if err != nil {
 			//TODO: deal with the error
 		}
 	} else {
-		orgList[0] = filters.Organization
+		orgList = append(orgList, filters.Organization)
 	}
 
 	// Extract the node list
 	orgNodes, err  :=  allNodes(orgList, filters)
-	fmt.Println("ORGNODES %+v ERR %+v\n", orgNodes, err)
 	if err != nil {
 		//TODO: Deal with the error
 	}
@@ -106,6 +124,13 @@ func singleNode( w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case "GET":
+		// Verify a logged in user made the request
+		_, code := loggedIn(r)
+		if code != -1 {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
 		// GET return single node information
 		node, err := getNode(vars["org"],vars["node"])
 		if err != nil {
@@ -117,16 +142,40 @@ func singleNode( w http.ResponseWriter, r *http.Request) {
 		}
 		w.WriteHeader(http.StatusOK)
 		w.Write(nodeJson)
-	case "POST":
+	case "PUT":
+		// Verify a logged in user made the request 
+		user, code := loggedIn(r)
+		if code != -1 {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
 		// PUT update a node
+		req, err := httputil.DumpRequest(r, true)
+		fmt.Printf("PUT Request Body %+v\n %+v\n", string(req), err)
 		var node chef.Node
 		err = json.NewDecoder(r.Body).Decode(&node)
 		if err != nil {
+			fmt.Printf("POST JSON ERR: %+v\n", err)
 			// TODO:
 			// handle the error
 		}
+
+		// Verify the user is allowed to update this node
+		userauth, err := userAllowed(node.Name, user)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		if !userauth {
+			w.WriteHeader(http.StatusForbidden)
+			return
+		}
+
+		fmt.Printf("UPDATE node %+v\n", node)
 		err = putNode(vars["org"],vars["node"],node)
 		if err != nil {
+			fmt.Printf("Update JSON ERR: %+vi\n", err)
 			// TODO:
 			// handle the error
 		}
@@ -162,7 +211,8 @@ func getNode(organization string, nodename string) (node chef.Node, err error) {
 
 func putNode(organization string, nodenam string, node chef.Node) (err error) {
 	client := chefapi_client.OrgClient(organization)
-	_,err = client.Nodes.Put(node)
+	nodereturn,err := client.Nodes.Put(node)
+	fmt.Printf("Return from put node %+v\n", nodereturn)
 	return
 }
 
@@ -253,5 +303,37 @@ func userAllowed(node string, user string) (authorized bool, err error) {
 		return
 	}
         authorized = auth.Auth
+	return
+}
+
+// loggedIn verifies the JWT and extracts the user name 
+func loggedIn(r *http.Request) (user string, code int) {
+	code = -1
+        reqToken := r.Header.Get("Authorization")
+	fmt.Printf("REQTOKEN %+v\n", reqToken)
+        splitToken := strings.Split(reqToken, "Bearer")
+        // Verify index before using
+        if len(splitToken) != 2 {
+                 code = http.StatusBadRequest
+                 return
+        }
+        tknStr := strings.TrimSpace(splitToken[1])
+        claims := &Claims{}
+        tkn, err := jwt.ParseWithClaims(tknStr, claims, func(token *jwt.Token) (interface{}, error) {
+                return jwtKey, nil
+        })
+        if err != nil {
+                if err == jwt.ErrSignatureInvalid {
+                        code = http.StatusUnauthorized
+                        return
+                }
+                code = http.StatusBadRequest
+                return
+        }
+        if !tkn.Valid {
+                code = http.StatusUnauthorized
+                return
+        }
+        user = claims.Username
 	return
 }

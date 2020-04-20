@@ -20,18 +20,31 @@ DESC="Chefapi node auth rest service"
 . /usr/local/nodes/bin/settings.sh
 running=$(ps -ef|grep main|grep "restport ${CHEFAPIAUTHPORT}"|grep -v grep|awk '{print $2}')
 
+start()
+{
+	cd /root/go/src/github.com/MarkGibbons/chefapi_node_auth
+	go run main.go -restcert ${CHEFAPIAUTHCERT} -restkey ${CHEFAPIAUTHKEY} -restport ${CHEFAPIAUTHPORT} </dev/null 1>/tmp/chefapi_node_auth.log 2>&1 &
+}
+stop()
+{
+	echo "${running}" | xargs -L1 kill -9 
+}
+
 case "${1}" in
+	restart)
+		stop
+		start
+		;;
 	start)
 		# start the node auth rest service
 		if [ -z "${running}" ]; then
-			cd /root/go/src/github.com/MarkGibbons/chefapi_node_auth
-			go run main.go -restcert ${CHEFAPIAUTHCERT} -restkey ${CHEFAPIAUTHKEY} -restport ${CHEFAPIAUTHPORT} </dev/null 1>/tmp/chefapi_node_auth.log 2>&1 &
+			start
 			exit $?
 		fi
 		;;
 	stop)
 		if [ -n "${running}" ]; then
-			echo "${running}" | xargs -L1 kill -9 
+			stop
 		fi
 		;;
 	status)

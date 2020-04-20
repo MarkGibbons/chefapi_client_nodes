@@ -1,15 +1,20 @@
 # TODO: Make this a template
 export GOPATH=/root/go
 
-# Node authorization service
-export CHEFAPIAUTHPORT=9001
-export CHEFAPIAUTHURL=http://testhost:${CHEFAPIAUTHPORT} 
-
 # api to the chef server
 export CHEFAPICHEFUSER=pivotal
 export CHEFAPIKEYFILE=/etc/opscode/pivotal.pem
 export CHEFAPICHRURL=https://testhost
 export CHEFAPICERTFILE=/home/vagrant/.chef/trusted_certs/testhost.crt
+
+# Login token service
+export CHEFAPILOGINPORT=8113
+export CHEFAPILOGINCERT=/usr/local/node/certs/server.crt
+export CHEFAPILOGINKEY=/usr/local/node/certs/server.key
+
+# Node authorization service
+export CHEFAPIAUTHPORT=9001
+export CHEFAPIAUTHURL=http://testhost:${CHEFAPIAUTHPORT} 
 
 # Nodes rest service
 export CHEFAPINODECERT=/usr/local/node/certs/server.crt
