@@ -2,6 +2,10 @@
 # Manage the chefapi nodes application services
 #
 
+directory '/usr/local/node/certs' do
+  recursive true
+end
+
 remote_directory '/usr/local/nodes' do
   source 'nodes'
   mode '0755'

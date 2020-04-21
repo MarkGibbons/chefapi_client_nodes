@@ -11,6 +11,7 @@ import (
 	"github.com/go-chef/chef"
 	"github.com/gorilla/mux"
 	"log"
+	"net"
 	"net/http"
 	"net/http/httputil"
 	"regexp"
@@ -53,8 +54,11 @@ func main() {
 	r.HandleFunc("/orgnodes", getNodes)
 	r.HandleFunc("/orgnodes/{org}/nodes/{node}", singleNode)
 	r.HandleFunc("/", defaultResp)
-	// TODO: Use TLS
-	log.Fatal(http.ListenAndServe(":"+flags.Port, r))
+	l, err := net.Listen("tcp4", ":"+flags.Port)
+	if  err  != nil {
+		panic(err.Error())
+	}
+	log.Fatal(http.ServeTLS(l, r, flags.Cert, flags.Key))
 	return
 }
 
@@ -287,6 +291,7 @@ func flagInit() {
 	flags.Cert = *restcert
 	flags.Key = *restkey
 	flags.Port = *restport
+	fmt.Printf("Flags used %+v\n", flags)
 	return
 }
 

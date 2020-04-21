@@ -1,6 +1,0 @@
-[ req ]
-  distinguished_name = testhost
-  output_password = secret
-[ testhost ]
-  countryName = US
-  statOrProvinceName = WA
