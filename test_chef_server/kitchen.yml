@@ -8,6 +8,8 @@ driver:
     - ['../../chefapi_node_auth', '/root/go/src/github.com/MarkGibbons/chefapi_node_auth']
     - ['../../chefapi_lib', '/root/go/src/github.com/MarkGibbons/chefapi_lib']
     - ['../../chefapi_login', '/root/go/src/github.com/MarkGibbons/chefapi_login']
+    - ['../../chefapi_client_users', '/root/go/src/github.com/MarkGibbons/chefapi_client_users']
+    - ['/Users/xmjg/go/src/github.com/go-chef/chef', '/root/go/src/github.com/go-chef/chef']
     - ['../test_setup', '/root/go/src/testapi']
 
 provisioner:
@@ -23,8 +25,9 @@ platforms:
         - ["forwarded_port", { guest: 9001, host: 9001, auto_correct: true }] # auth
         - ["forwarded_port", { guest: 8111, host: 8111, auto_correct: true }] # nodes
         - ["forwarded_port", { guest: 8112, host: 8112, auto_correct: true }] # organizations
-        - ["forwarded_port", { guest: 8113, host: 8113, auto_correct: true }] # organizations
-        - ["forwarded_port", { guest: 8443, host: 8113, auto_correct: true }] # nginx
+        - ["forwarded_port", { guest: 8113, host: 8113, auto_correct: true }] # login JWT token
+        - ["forwarded_port", { guest: 8114, host: 8114, auto_correct: true }] # users
+        - ["forwarded_port", { guest:  443, host: 8443, auto_correct: true }] # chef manage
 
 suites:
   - name: default

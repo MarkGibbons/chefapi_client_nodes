@@ -27,6 +27,10 @@ file '/usr/local/nodes/bin/start_organizations.sh' do
   mode '0755'
 end
 
+file '/usr/local/nodes/bin/start_users.sh' do
+  mode '0755'
+end
+
 link '/etc/init.d/chefapi-login' do
   to '/usr/local/nodes/bin/start_login.sh'
 end
@@ -41,6 +45,10 @@ end
 
 link '/etc/init.d/chefapi-organizations' do
   to '/usr/local/nodes/bin/start_organizations.sh'
+end
+
+link '/etc/init.d/chefapi-users' do
+  to '/usr/local/nodes/bin/start_users.sh'
 end
 
 # start login
@@ -66,6 +74,13 @@ end
 
 # start nodes
 service 'chefapi-nodes' do
+  provider Chef::Provider::Service::Init
+  supports status: true
+  action [:restart]
+end
+
+# start nodes
+service 'chefapi-users' do
   provider Chef::Provider::Service::Init
   supports status: true
   action [:restart]

@@ -8,10 +8,10 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net/url"
 	"os"
 	"path"
 	"strconv"
-	"net/url"
 
 	chef "github.com/go-chef/chef"
 )
@@ -45,6 +45,7 @@ func OrgClient(org string) *chef.Client {
 	u.Path = path.Join(u.Path, "organizations", org, "nodes")
 	return buildClient(user, keyfile, u.String(), skipssl)
 }
+
 // buildClient creates a connection to a chef server using the chef api.
 // goiardi uses port 4545 by default, chef-zero uses 8889, chef-server uses 443
 func buildClient(user string, keyfile string, baseurl string, skipssl bool) *chef.Client {

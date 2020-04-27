@@ -26,6 +26,11 @@ export CHEFAPIORGCERT=/usr/local/nodes/certs/server.crt
 export CHEFAPIORGKEY=/usr/local/nodes/certs/server.key
 export CHEFAPIORGPORT=8112
 
+# Users rest service
+export CHEFAPIUSERCERT=/usr/local/nodes/certs/server.crt
+export CHEFAPIUSERKEY=/usr/local/nodes/certs/server.key
+export CHEFAPIUSERPORT=8114
+
 # Web rest service
 export CHEFAPIWEBCERT=/usr/local/nodes/certs/server.crt
 export CHEFAPIWEBKEY=/usr/local/nodes/certs/server.key

@@ -7,8 +7,9 @@ import (
 )
 
 var cases = map[string]func(){
-	"node": testapi.Node,
+	"node":         testapi.Node,
 	"organization": testapi.Organization,
+	"user":         testapi.User,
 }
 
 // Invoke the requested testapi test function
@@ -17,8 +18,7 @@ func main() {
 	fn, ok := cases[testcase]
 	if ok {
 		fn()
-        } else {
+	} else {
 		fmt.Fprintf(os.Stderr, "Requested case %+s was not found\n", testcase)
 	}
 }
-

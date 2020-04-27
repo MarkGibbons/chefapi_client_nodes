@@ -11,7 +11,7 @@ import (
 // Create an assortment of nodes in each organization
 func Node() {
 	orgs := []string{"blue", "sales", "admin", "testorg", "mainapp"}
-	node_prefixes := []string{"art","ban","red","ska"}
+	node_prefixes := []string{"art", "ban", "red", "ska"}
 	for i, org := range orgs {
 		client := OrgClient(org)
 		for j, pre := range node_prefixes {

@@ -5,7 +5,7 @@ execute 'get the ssl certificate for the chef server' do
 end
 
 execute 'Get go modules' do
-	command 'export GOPATH=/root/go && cd /root/go/src/github.com/MarkGibbons && go get ./...'
+  command 'export GOPATH=/root/go && cd /root/go/src/github.com/MarkGibbons && go get ./...'
 end
 
 execute 'Create organizations' do
@@ -13,5 +13,9 @@ execute 'Create organizations' do
 end
 
 execute 'Create nodes' do
+  command '/root/go/src/testapi/bin/node'
+end
+
+execute 'Create users' do
   command '/root/go/src/testapi/bin/node'
 end
