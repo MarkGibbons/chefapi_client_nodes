@@ -85,7 +85,6 @@ func getNodes(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get a list of organizations to search for this request
-	fmt.Printf("Filters : %+v", filters)
 	var orgList []string
 	if filters.Organization == "" {
 		orgList, err = chefapi_lib.AllOrgs()
