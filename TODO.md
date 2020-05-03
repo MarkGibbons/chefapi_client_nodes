@@ -4,6 +4,3 @@
 * Error messages when things break
 * Remove the debug code
 * Further unit tests
-
-## Web
-* Polish the web site
