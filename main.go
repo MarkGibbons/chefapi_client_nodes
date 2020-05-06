@@ -57,6 +57,7 @@ func getNodes(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	err := chefapi_lib.CleanInput(vars)
 	if err != nil {
+		fmt.Printf("getNodes - Input error in the REST url %+v\n", err)
 		chefapi_lib.InputError(&w)
 		return
 	}
@@ -79,8 +80,8 @@ func getNodes(w http.ResponseWriter, r *http.Request) {
 	// Verify a logged in user made the request
 	_, code := chefapi_lib.LoggedIn(r)
 	if code != -1 {
-		fmt.Printf("Can't verify the user status: %+v\n", code)
-		w.WriteHeader(code)
+		fmt.Printf("getNodes - Can't verify the user status: %+v\n", code)
+		http.Error(w, "User is not logged in", http.StatusUnauthorized)
 		return
 	}
 
@@ -91,6 +92,7 @@ func getNodes(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			msg, code := chefapi_lib.ChefStatus(err)
 			http.Error(w, msg, code)
+			fmt.Printf("getNodes List Orgs - Error %+v msg %+v code %+v\n", err, msg, code)
 			return
 		}
 	} else {
@@ -102,13 +104,15 @@ func getNodes(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		msg, code := chefapi_lib.ChefStatus(err)
 		http.Error(w, msg, code)
+		fmt.Printf("getNodes List Nodes - Error %+v msg %+v code %+v\n", err, msg, code)
 		return
 	}
 
 	//  Handle the results and return the json body
 	nodesJSON, err := json.Marshal(orgNodes)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		fmt.Printf("getNodes JSON - Error %+v\n", err)
 		return
 	}
 	w.WriteHeader(http.StatusOK)
@@ -121,6 +125,7 @@ func singleNode(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	err := chefapi_lib.CleanInput(vars)
 	if err != nil {
+		fmt.Printf("singleNode - Input error in the REST url %+v\n", err)
 		chefapi_lib.InputError(&w)
 		return
 	}
@@ -130,7 +135,8 @@ func singleNode(w http.ResponseWriter, r *http.Request) {
 		// Verify a logged in user made the request
 		_, code := chefapi_lib.LoggedIn(r)
 		if code != -1 {
-			http.Error(w,"User is not logged in", http.StatusUnauthorized)
+			fmt.Printf("singleNode GET - Can't verify the user status: %+v\n", code)
+			http.Error(w, "User is not logged in", http.StatusUnauthorized)
 			return
 		}
 
@@ -139,38 +145,44 @@ func singleNode(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			msg, code := chefapi_lib.ChefStatus(err)
 			http.Error(w, msg, code)
+			fmt.Printf("singleNode GET - Error %+v msg %+v code %+v\n", err, msg, code)
 			return
 		}
 		nodeJson, err := json.Marshal(node)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			fmt.Printf("singleNode GET JSON - Error %+v\n", err)
 			return
 		}
 		w.WriteHeader(http.StatusOK)
 		w.Write(nodeJson)
 	case "PUT":
+		// PUT update a node
 		// Verify a logged in user made the request
 		user, code := chefapi_lib.LoggedIn(r)
 		if code != -1 {
-			w.WriteHeader(http.StatusUnauthorized)
+			fmt.Printf("singleNode PUT - Can't verify the user status: %+v\n", code)
+			http.Error(w, "User is not logged in", http.StatusUnauthorized)
 			return
 		}
 
-		// PUT update a node
 		var node chef.Node
 		err = json.NewDecoder(r.Body).Decode(&node)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
+			fmt.Printf("singleNode PUT decode input JSON - Error %+v\n", err)
 			return
 		}
 
 		// Verify the user is allowed to update this node
 		userauth, err := userAllowed(node.Name, user)
 		if err != nil {
+			fmt.Printf("singleNode PUT auth fail - Error %+v\n", err)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 		if !userauth {
+			fmt.Printf("singleNode PUT not auth  %+v\n", userauth)
 			http.Error(w, err.Error(), http.StatusForbidden)
 			return
 		}
@@ -180,6 +192,7 @@ func singleNode(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			msg, code := chefapi_lib.ChefStatus(err)
 			http.Error(w, msg, code)
+			fmt.Printf("singleNode PUT - Error %+v msg %+v code %+v\n", err, msg, code)
 			return
 		}
 		w.WriteHeader(http.StatusOK)
